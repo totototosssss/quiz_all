@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>専用暗記アプリ</title>
+<style>
+  body {
+    font-family: sans-serif;
+    background-color: #f4f7f6;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+  }
+  .card {
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    width: 90%;
+    max-width: 600px;
+    text-align: center;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .category {
+    font-size: 0.9em;
+    color: #888;
+    margin-bottom: 10px;
+  }
+  .question {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #333;
+    min-height: 80px;
+  }
+  .answer {
+    font-size: 1.2em;
+    color: #d32f2f;
+    margin-bottom: 30px;
+    font-weight: bold;
+    display: none;
+    min-height: 60px;
+  }
+  button {
+    padding: 12px 24px;
+    font-size: 1em;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s;
+    margin: 5px;
+  }
+  .btn-show {
+    background-color: #1976d2;
+    color: white;
+    width: 100%;
+  }
+  .btn-show:hover {
+    background-color: #1565c0;
+  }
+  .eval-btns {
+    display: none;
+    justify-content: space-between;
+  }
+  .btn-remembered {
+    background-color: #388e3c;
+    color: white;
+    flex: 1;
+    margin-right: 10px;
+  }
+  .btn-remembered:hover {
+    background-color: #2e7d32;
+  }
+  .btn-forgot {
+    background-color: #f57c00;
+    color: white;
+    flex: 1;
+    margin-left: 10px;
+  }
+  .btn-forgot:hover {
+    background-color: #ef6c00;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="category" id="category"></div>
+  <div class="question" id="question"></div>
+  <div class="answer" id="answer"></div>
+  
+  <button class="btn-show" id="btn-show" onclick="showAnswer()">回答を見る</button>
+  
+  <div class="eval-btns" id="eval-btns">
+    <button class="btn-remembered" onclick="evaluateQuiz(true)">覚えた</button>
+    <button class="btn-forgot" onclick="evaluateQuiz(false)">覚えてない</button>
+  </div>
+</div>
+
+<script>
+const quizData = [
+  { category: "M-1グランプリ", q: "2001年 1位", a: "中川家", weight: 10 },
+  { category: "M-1グランプリ", q: "2001年 2位", a: "ハリガネロック", weight: 10 },
+  { category: "M-1グランプリ", q: "2001年 3位", a: "アメリカザリガニ", weight: 10 },
+  { category: "M-1グランプリ", q: "2002年 1位", a: "ますだおかだ", weight: 10 },
+  { category: "M-1グランプリ", q: "2002年 2位", a: "フットボールアワー", weight: 10 },
+  { category: "M-1グランプリ", q: "2002年 3位", a: "笑い飯", weight: 10 },
+  { category: "M-1グランプリ", q: "2003年 1位", a: "フットボールアワー", weight: 10 },
+  { category: "M-1グランプリ", q: "2003年 2位", a: "笑い飯", weight: 10 },
+  { category: "M-1グランプリ", q: "2003年 3位", a: "アンタッチャブル", weight: 10 },
+  { category: "M-1グランプリ", q: "2004年 1位", a: "アンタッチャブル", weight: 10 },
+  { category: "M-1グランプリ", q: "2004年 2位", a: "南海キャンディーズ", weight: 10 },
+  { category: "M-1グランプリ", q: "2004年 3位", a: "笑い飯", weight: 10 },
+  { category: "M-1グランプリ", q: "2005年 1位", a: "ブラックマヨネーズ", weight: 10 },
+  { category: "M-1グランプリ", q: "2005年 2位", a: "笑い飯", weight: 10 },
+  { category: "M-1グランプリ", q: "2005年 3位", a: "麒麟", weight: 10 },
+  { category: "M-1グランプリ", q: "2006年 1位", a: "チュートリアル", weight: 10 },
+  { category: "M-1グランプリ", q: "2006年 2位", a: "フットボールアワー", weight: 10 },
+  { category: "M-1グランプリ", q: "2006年 3位", a: "麒麟", weight: 10 },
+  { category: "M-1グランプリ", q: "2007年 1位", a: "サンドウィッチマン", weight: 10 },
+  { category: "M-1グランプリ", q: "2007年 2位", a: "トータルテンボス", weight: 10 },
+  { category: "M-1グランプリ", q: "2007年 3位", a: "キングコング", weight: 10 },
+  { category: "M-1グランプリ", q: "2008年 1位", a: "NON STYLE", weight: 10 },
+  { category: "M-1グランプリ", q: "2008年 2位", a: "オードリー", weight: 10 },
+  { category: "M-1グランプリ", q: "2008年 3位", a: "ナイツ", weight: 10 },
+  { category: "M-1グランプリ", q: "2009年 1位", a: "パンクブーブー", weight: 10 },
+  { category: "M-1グランプリ", q: "2009年 2位", a: "笑い飯", weight: 10 },
+  { category: "M-1グランプリ", q: "2009年 3位", a: "NON STYLE", weight: 10 },
+  { category: "M-1グランプリ", q: "2010年 1位", a: "笑い飯", weight: 10 },
+  { category: "M-1グランプリ", q: "2010年 2位", a: "スリムクラブ", weight: 10 },
+  { category: "M-1グランプリ", q: "2010年 3位", a: "パンクブーブー", weight: 10 },
+  { category: "M-1グランプリ", q: "2015年 1位", a: "トレンディエンジェル", weight: 10 },
+  { category: "M-1グランプリ", q: "2015年 2位", a: "銀シャリ", weight: 10 },
+  { category: "M-1グランプリ", q: "2015年 3位", a: "ジャルジャル", weight: 10 },
+  { category: "M-1グランプリ", q: "2016年 1位", a: "銀シャリ", weight: 10 },
+  { category: "M-1グランプリ", q: "2016年 2位", a: "和牛", weight: 10 },
+  { category: "M-1グランプリ", q: "2016年 3位", a: "スーパーマラドーナ", weight: 10 },
+  { category: "M-1グランプリ", q: "2017年 1位", a: "とろサーモン", weight: 10 },
+  { category: "M-1グランプリ", q: "2017年 2位", a: "和牛", weight: 10 },
+  { category: "M-1グランプリ", q: "2017年 3位", a: "ミキ", weight: 10 },
+  { category: "M-1グランプリ", q: "2018年 1位", a: "霜降り明星", weight: 10 },
+  { category: "M-1グランプリ", q: "2018年 2位", a: "和牛", weight: 10 },
+  { category: "M-1グランプリ", q: "2018年 3位", a: "ジャルジャル", weight: 10 },
+  { category: "M-1グランプリ", q: "2019年 1位", a: "ミルクボーイ", weight: 10 },
+  { category: "M-1グランプリ", q: "2019年 2位", a: "かまいたち", weight: 10 },
+  { category: "M-1グランプリ", q: "2019年 3位", a: "ぺこぱ", weight: 10 },
+  { category: "M-1グランプリ", q: "2020年 1位", a: "マヂカルラブリー", weight: 10 },
+  { category: "M-1グランプリ", q: "2020年 2位", a: "おいでやすこが", weight: 10 },
+  { category: "M-1グランプリ", q: "2020年 3位", a: "見取り図", weight: 10 },
+  { category: "M-1グランプリ", q: "2021年 1位", a: "錦鯉", weight: 10 },
+  { category: "M-1グランプリ", q: "2021年 2位", a: "オズワルド", weight: 10 },
+  { category: "M-1グランプリ", q: "2021年 3位", a: "インディアンス", weight: 10 },
+  { category: "M-1グランプリ", q: "2022年 1位", a: "ウエストランド", weight: 10 },
+  { category: "M-1グランプリ", q: "2022年 2位", a: "さや香", weight: 10 },
+  { category: "M-1グランプリ", q: "2022年 3位", a: "ロングコートダディ", weight: 10 },
+  { category: "M-1グランプリ", q: "2023年 1位", a: "令和ロマン", weight: 10 },
+  { category: "M-1グランプリ", q: "2023年 2位", a: "ヤーレンズ", weight: 10 },
+  { category: "M-1グランプリ", q: "2023年 3位", a: "さや香", weight: 10 },
+  { category: "M-1グランプリ", q: "2024年 1位", a: "令和ロマン", weight: 10 },
+  { category: "M-1グランプリ", q: "2024年 2位", a: "バッテリィズ", weight: 10 },
+  { category: "M-1グランプリ", q: "2024年 3位", a: "真空ジェシカ", weight: 10 },
+  { category: "M-1グランプリ", q: "2025年 1位", a: "たくろう", weight: 10 },
+  { category: "M-1グランプリ", q: "2025年 2位", a: "ドンデコルテ", weight: 10 },
+  { category: "M-1グランプリ", q: "2025年 3位", a: "エバース", weight: 10 },
+
+  { category: "オリンポス12神", q: "主神であり、天空と雷を司る神", a: "ゼウス", weight: 10 },
+  { category: "オリンポス12神", q: "神々の女王であり、結婚と母性を司る女神", a: "ヘラ", weight: 10 },
+  { category: "オリンポス12神", q: "海と地震を司る神", a: "ポセイドン", weight: 10 },
+  { category: "オリンポス12神", q: "農業と大地を司る女神", a: "デメテル", weight: 10 },
+  { category: "オリンポス12神", q: "知恵、工芸、戦略を司る女神", a: "アテナ", weight: 10 },
+  { category: "オリンポス12神", q: "太陽、音楽、予言、弓術を司る神", a: "アポロン", weight: 10 },
+  { category: "オリンポス12神", q: "狩猟、月、貞潔を司る女神", a: "アルテミス", weight: 10 },
+  { category: "オリンポス12神", q: "戦争と狂暴を司る神", a: "アレス", weight: 10 },
+  { category: "オリンポス12神", q: "愛と美を司る女神", a: "アプロディテ", weight: 10 },
+  { category: "オリンポス12神", q: "炎と鍛冶を司る神", a: "ヘパイストス", weight: 10 },
+  { category: "オリンポス12神", q: "伝令、旅人、商業、泥棒の守護神", a: "ヘルメス", weight: 10 },
+  { category: "オリンポス12神", q: "豊穣とブドウ酒、酩酊を司る神", a: "ディオニュソス", weight: 10 },
+
+  { category: "四神", q: "東方を守護する青色の霊獣（春を司る）", a: "青龍", weight: 10 },
+  { category: "四神", q: "南方を守護する赤色の霊獣（夏を司る）", a: "朱雀", weight: 10 },
+  { category: "四神", q: "西方を守護する白色の霊獣（秋を司る）", a: "白虎", weight: 10 },
+  { category: "四神", q: "北方を守護する黒色の霊獣（冬を司る）", a: "玄武", weight: 10 },
+
+  { category: "日本三大", q: "日本三大夜景", a: "函館（函館山）、神戸（摩耶山）、長崎（稲佐山）", weight: 10 },
+  { category: "日本三大", q: "日本三大名瀑（滝）", a: "那智の滝（和歌山）、華厳の滝（栃木）、袋田の滝（茨城）", weight: 10 },
+  { category: "日本三大", q: "日本三名園", a: "兼六園（石川）、後楽園（岡山）、偕楽園（茨城）", weight: 10 },
+
+  { category: "科学系ノーベル賞(生理学・医学)", q: "1987年 多様な抗体を生み出す遺伝的原理の解明", a: "利根川進", weight: 10 },
+  { category: "科学系ノーベル賞(生理学・医学)", q: "2012年 成熟細胞が初期化され多能性を持つことの発見(iPS細胞)", a: "山中伸弥、ジョン・ガードン", weight: 10 },
+  { category: "科学系ノーベル賞(生理学・医学)", q: "2015年 線虫の寄生によって引き起こされる感染症に対する新治療法の発見", a: "大村智、ウィリアム・キャンベル", weight: 10 },
+  { category: "科学系ノーベル賞(生理学・医学)", q: "2016年 オートファジーの仕組みの解明", a: "大隅良典", weight: 10 },
+  { category: "科学系ノーベル賞(生理学・医学)", q: "2018年 免疫チェックポイント阻害因子の発見とがん治療への応用", a: "本庶佑、ジェームズ・アリソン", weight: 10 },
+  { category: "科学系ノーベル賞(生理学・医学)", q: "2024年 マイクロRNAの発見とその転写後遺伝子発現調節における役割", a: "ヴィクター・アンブロス、ゲイリー・ラブカン", weight: 10 },
+  { category: "科学系ノーベル賞(生理学・医学)", q: "2025年 末梢性免疫寛容の発見(制御性T細胞)", a: "坂口志文、メアリー・E・ブランコウ、フレッド・ラムズデール", weight: 10 },
+
+  { category: "科学系ノーベル賞(物理学)", q: "1949年 中間子の存在の予想", a: "湯川秀樹", weight: 10 },
+  { category: "科学系ノーベル賞(物理学)", q: "1965年 量子電気力学の分野における基礎的研究", a: "朝永振一郎、リチャード・ファインマン、ジュリアン・シュウィンガー", weight: 10 },
+  { category: "科学系ノーベル賞(物理学)", q: "1973年 半導体および超伝導体におけるトンネル効果の実験的発見", a: "江崎玲於奈、アイヴァー・ジェーバー、ブライアン・ジョセフソン", weight: 10 },
+  { category: "科学系ノーベル賞(物理学)", q: "2002年 天体物理学における先駆的貢献、特に宇宙ニュートリノの検出", a: "小柴昌俊、レイモンド・デービス", weight: 10 },
+  { category: "科学系ノーベル賞(物理学)", q: "2008年 素粒子物理学における自発的対称性の破れのメカニズムの発見", a: "南部陽一郎", weight: 10 },
+  { category: "科学系ノーベル賞(物理学)", q: "2008年 クォークが少なくとも3世代以上存在することを予言する対称性の破れの起源の発見", a: "小林誠、益川敏英", weight: 10 },
+  { category: "科学系ノーベル賞(物理学)", q: "2014年 高輝度で省電力な白色光源を可能にした青色発光ダイオードの発明", a: "赤﨑勇、天野浩、中村修二", weight: 10 },
+  { category: "科学系ノーベル賞(物理学)", q: "2015年 ニュートリノ振動の発見", a: "梶田隆章、アーサー・B・マクドナルド", weight: 10 },
+  { category: "科学系ノーベル賞(物理学)", q: "2021年 地球気候の物理モデリング、気候変動の予測可能性と地球温暖化の確実な予測", a: "真鍋淑郎、クラウス・ハッセルマン", weight: 10 },
+  { category: "科学系ノーベル賞(物理学)", q: "2024年 人工ニューラルネットワークによる機械学習の基礎的発見", a: "ジョン・ホップフィールド、ジェフリー・ヒントン", weight: 10 },
+
+  { category: "科学系ノーベル賞(化学)", q: "1981年 化学反応過程の理論的研究(フロンティア軌道理論)", a: "福井謙一、ロアルド・ホフマン", weight: 10 },
+  { category: "科学系ノーベル賞(化学)", q: "2000年 導電性高分子の発見と開発", a: "白川英樹、アラン・ヒーガー、アラン・マクダイアミッド", weight: 10 },
+  { category: "科学系ノーベル賞(化学)", q: "2001年 キラル触媒による不斉水素化反応の研究", a: "野依良治、ウィリアム・ノールズ", weight: 10 },
+  { category: "科学系ノーベル賞(化学)", q: "2002年 生体高分子の同定および構造解析のための手法の開発(ソフトレーザー脱離イオン化法)", a: "田中耕一、ジョン・フェン", weight: 10 },
+  { category: "科学系ノーベル賞(化学)", q: "2008年 緑色蛍光タンパク質(GFP)の発見と開発", a: "下村脩、マーティン・チャルフィー、ロジャー・チエン", weight: 10 },
+  { category: "科学系ノーベル賞(化学)", q: "2010年 有機合成におけるパラジウム触媒クロスカップリング", a: "鈴木章、根岸英一、リチャード・ヘック", weight: 10 },
+  { category: "科学系ノーベル賞(化学)", q: "2019年 リチウムイオン二次電池の開発", a: "吉野彰、ジョン・グッドイナフ、スタンリー・ウィッティンガム", weight: 10 },
+  { category: "科学系ノーベル賞(化学)", q: "2024年 タンパク質の計算論的設計と構造予測", a: "デイビッド・ベイカー、デミス・ハサビス、ジョン・ジャンパー", weight: 10 },
+  { category: "科学系ノーベル賞(化学)", q: "2025年 金属有機構造体(MOF)の開発", a: "北川進、リチャード・ロブソン、オマー・ヤギー", weight: 10 }
+];
+
+let currentQuiz = null;
+
+function getNextQuiz() {
+  const activeData = quizData.filter(d => d.weight > 0);
+  
+  if (activeData.length === 0) {
+    document.getElementById("category").textContent = "";
+    document.getElementById("question").textContent = "全て覚えました！お疲れ様でした！";
+    document.getElementById("answer").textContent = "";
+    document.getElementById("btn-show").style.display = "none";
+    document.getElementById("eval-btns").style.display = "none";
+    return;
+  }
+
+  let totalWeight = activeData.reduce((sum, d) => sum + d.weight, 0);
+  let randomNum = Math.random() * totalWeight;
+  
+  for (let i = 0; i < activeData.length; i++) {
+    randomNum -= activeData[i].weight;
+    if (randomNum <= 0) {
+      currentQuiz = activeData[i];
+      break;
+    }
+  }
+
+  document.getElementById("category").textContent = "【" + currentQuiz.category + "】";
+  document.getElementById("question").textContent = currentQuiz.q;
+  document.getElementById("answer").textContent = currentQuiz.a;
+  
+  document.getElementById("answer").style.display = "none";
+  document.getElementById("btn-show").style.display = "block";
+  document.getElementById("eval-btns").style.display = "none";
+}
+
+function showAnswer() {
+  document.getElementById("answer").style.display = "block";
+  document.getElementById("btn-show").style.display = "none";
+  document.getElementById("eval-btns").style.display = "flex";
+}
+
+function evaluateQuiz(remembered) {
+  if (remembered) {
+    currentQuiz.weight = 0;
+  } else {
+    currentQuiz.weight += 15;
+  }
+  getNextQuiz();
+}
+
+window.onload = getNextQuiz;
+</script>
+</body>
+</html>
