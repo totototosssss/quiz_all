@@ -25,6 +25,17 @@
     max-height: 90vh;
     overflow-y: auto;
   }
+  #menu-screen h2 {
+    margin-top: 0;
+    color: #333;
+  }
+  .category-label {
+    display: block;
+    text-align: left;
+    margin: 10px 0;
+    font-size: 1.1em;
+    cursor: pointer;
+  }
   .category {
     font-size: 0.9em;
     color: #888;
@@ -53,6 +64,16 @@
     cursor: pointer;
     transition: background 0.3s;
     margin: 5px;
+  }
+  .btn-start {
+    background-color: #4CAF50;
+    color: white;
+    width: 100%;
+    font-size: 1.1em;
+    font-weight: bold;
+  }
+  .btn-start:hover {
+    background-color: #45a049;
   }
   .btn-show {
     background-color: #1976d2;
@@ -84,20 +105,39 @@
   .btn-forgot:hover {
     background-color: #ef6c00;
   }
+  .btn-back {
+    background-color: #757575;
+    color: white;
+    width: 100%;
+    margin-top: 20px;
+  }
+  .btn-back:hover {
+    background-color: #616161;
+  }
 </style>
 </head>
 <body>
 
 <div class="card">
-  <div class="category" id="category"></div>
-  <div class="question" id="question"></div>
-  <div class="answer" id="answer"></div>
-  
-  <button class="btn-show" id="btn-show" onclick="showAnswer()">回答を見る</button>
-  
-  <div class="eval-btns" id="eval-btns">
-    <button class="btn-remembered" onclick="evaluateQuiz(true)">覚えた</button>
-    <button class="btn-forgot" onclick="evaluateQuiz(false)">覚えてない</button>
+  <div id="menu-screen">
+    <h2>学習するカテゴリーを選択</h2>
+    <div id="category-list" style="text-align: left; max-height: 50vh; overflow-y: auto; margin-bottom: 20px;"></div>
+    <button class="btn-start" onclick="startQuiz()">クイズ開始</button>
+  </div>
+
+  <div id="quiz-screen" style="display: none;">
+    <div class="category" id="category"></div>
+    <div class="question" id="question"></div>
+    <div class="answer" id="answer"></div>
+    
+    <button class="btn-show" id="btn-show" onclick="showAnswer()">回答を見る</button>
+    
+    <div class="eval-btns" id="eval-btns">
+      <button class="btn-remembered" onclick="evaluateQuiz(true)">覚えた</button>
+      <button class="btn-forgot" onclick="evaluateQuiz(false)">覚えてない</button>
+    </div>
+
+    <button class="btn-back" onclick="returnToMenu()">カテゴリー選択に戻る</button>
   </div>
 </div>
 
@@ -242,14 +282,49 @@ const quizData = [
   { category: "科学系ノーベル賞(化学)", q: "2025年 金属有機構造体(MOF)の開発", a: "北川進、リチャード・ロブソン、オマー・ヤギー", weight: 10 }
 ];
 
+let selectedCategories = [];
 let currentQuiz = null;
 
+window.onload = () => {
+  const categories = [...new Set(quizData.map(q => q.category))];
+  const menu = document.getElementById('category-list');
+  categories.forEach(cat => {
+    const label = document.createElement('label');
+    label.className = 'category-label';
+    label.innerHTML = `<input type="checkbox" value="${cat}" checked> ${cat}`;
+    menu.appendChild(label);
+  });
+};
+
+function startQuiz() {
+  const checkboxes = document.querySelectorAll('#category-list input:checked');
+  selectedCategories = Array.from(checkboxes).map(cb => cb.value);
+  
+  if (selectedCategories.length === 0) {
+    alert('カテゴリーを1つ以上選択してください。');
+    return;
+  }
+
+  quizData.forEach(d => {
+    d.weight = 10;
+  });
+
+  document.getElementById('menu-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  getNextQuiz();
+}
+
+function returnToMenu() {
+  document.getElementById('menu-screen').style.display = 'block';
+  document.getElementById('quiz-screen').style.display = 'none';
+}
+
 function getNextQuiz() {
-  const activeData = quizData.filter(d => d.weight > 0);
+  const activeData = quizData.filter(d => selectedCategories.includes(d.category) && d.weight > 0);
   
   if (activeData.length === 0) {
     document.getElementById("category").textContent = "";
-    document.getElementById("question").textContent = "全て覚えました！お疲れ様でした！";
+    document.getElementById("question").textContent = "選択したカテゴリーの問題を全て覚えました！";
     document.getElementById("answer").textContent = "";
     document.getElementById("btn-show").style.display = "none";
     document.getElementById("eval-btns").style.display = "none";
@@ -290,8 +365,6 @@ function evaluateQuiz(remembered) {
   }
   getNextQuiz();
 }
-
-window.onload = getNextQuiz;
 </script>
 </body>
 </html>
