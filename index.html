@@ -969,12 +969,22 @@ const quizData = [
 { category: "バンド逆引き", q: "常田大希、井口理、新井和輝、勢喜遊", a: "King Gnu", weight: 10 },
 { category: "バンド逆引き", q: "後藤正文、喜多建介、山田貴洋、伊地知潔", a: "ASIAN KUNG-FU GENERATION", weight: 10 },
 { category: "バンド逆引き", q: "細美武士、生形真一、高田雄一、高橋宏貴", a: "ELLEGARDEN", weight: 10 },
-{ category: "バンド逆引き", q: "TAKUMA、NAOKI、KOUICHI、Ue-chan", a: "10-FEET", weight: 10 },
-{ category: "バンド逆引き", q: "Kj、IKUZONE、MAKOTO、HIROKI", a: "Dragon Ash", weight: 10 },
+{ category: "バンド逆引き", q: "TAKUMA、NAOKI、KOUICHI", a: "10-FEET", weight: 10 },
+
+/* Dragon Ash は「IKÜZÖNE」を現メンバーとして確定させると事故るので、
+   クイズ用途では“現行の主要4名”で固定推奨（公式プロフィールでも現体制は5人と説明されるが、明示の名簿が揃いにくい）。 */
+{ category: "バンド逆引き", q: "Kj、櫻井誠、BOTS、HIROKI", a: "Dragon Ash", weight: 10 },
+
 { category: "バンド逆引き", q: "TAKUYA∞、彰、克哉、真太郎、信人、誠果", a: "UVERworld", weight: 10 },
-{ category: "バンド逆引き", q: "Masato、Y.K.C、LIHITO、Katsuma", a: "coldrain", weight: 10 },
+
+/* ★修正: coldrain */
+{ category: "バンド逆引き", q: "Masato、Y.K.C、Sugi、RxYxO、Katsuma", a: "coldrain", weight: 10 },
+
 { category: "バンド逆引き", q: "GEN、HIROKAZ、RYU-TA、KOUHEI", a: "04 Limited Sazabys", weight: 10 },
-{ category: "バンド逆引き", q: "谷口鮪、古賀隼斗、小泉貴裕", a: "KANA-BOON", weight: 10 },
+
+/* ★修正: KANA-BOON（2026〜 4人体制） */
+{ category: "バンド逆引き", q: "谷口鮪、遠藤昌巳、ヨコイタカユキ、関優梨子", a: "KANA-BOON", weight: 10 },
+
 { category: "バンド逆引き", q: "川上洋平、白井眞輝、磯部寛之、リアド偉武", a: "[Alexandros]", weight: 10 },
 
 { category: "バンド逆引き", q: "Freddie Mercury、Brian May、Roger Taylor、John Deacon", a: "Queen", weight: 10 },
@@ -995,7 +1005,9 @@ const quizData = [
 { category: "バンド逆引き", q: "YEJI、LIA、RYUJIN、CHAERYEONG、YUNA", a: "ITZY", weight: 10 },
 
 { category: "バンド逆引き", q: "百田夏菜子、玉井詩織、佐々木彩夏、高城れに", a: "ももいろクローバーZ", weight: 10 },
-{ category: "バンド逆引き", q: "中元すず香、菊地最愛、水野由結", a: "BABYMETAL", weight: 10 },
+
+/* ★修正: BABYMETAL（現メンバー3人） */
+{ category: "バンド逆引き", q: "中元すず香、菊地最愛、岡崎百々子", a: "BABYMETAL", weight: 10 },
 ];
 
 let selectedCategories = [];
